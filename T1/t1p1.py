@@ -120,13 +120,14 @@ def createQuad(shaderProgram):
 if __name__ == "__main__":
 
     # Initialize glfw
+    window = None
     if not glfw.init():
         glfw.set_window_should_close(window, True)
 
-    width = 600
+    width = 800
     height = 600
 
-    window = glfw.create_window(width, height, "Tarea 0: Coloreando un cuadrado uwu", None, None)
+    window = glfw.create_window(width, height, "Tarea 1 p1 uwu", None, None)
 
     if not window:
         glfw.terminate()
