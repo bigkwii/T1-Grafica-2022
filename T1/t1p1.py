@@ -12,11 +12,18 @@ import es
 width = 800
 height = 600
 ar = width/height # aspect ratio
+screen_width = 150
+screen_height = 120
 tuNombre = "Álvaro"
+iniciales = "AM"
 l = len(tuNombre)
 _r = ord(tuNombre[0%l])*ord(tuNombre[1%l])%255
 _g = ord(tuNombre[2%l])*ord(tuNombre[3%l])%255
 _b = ord(tuNombre[4%l])*ord(tuNombre[5%l])%255
+alpha = ord(iniciales[0])*ord(iniciales[1])
+dx = 10 * np.cos(alpha)
+dy = 10 * np.sin(alpha)
+S = 20_265_040/20_000_000
 
 # This controller will allow to toggle wireframe by hitting spacebar
 class Controller:
@@ -61,6 +68,27 @@ def createLogo(x=0.0,y=0.0,r=1.0,g=1.0,b=1.0):
     
     return vertexData , indexData
 
+def createScreen(w, h):
+    '''
+    Screen that sits behind the logo
+    '''
+    vertexData = np.array([
+    # POS                   RGB
+        #x                    y                      z          r        g        b
+        -screen_width/width, -screen_height/height,  0.0,       10/255,  10/255 , 10/255,
+         screen_width/width, -screen_height/height,  0.0,       10/255,  10/255 , 10/255,
+         screen_width/width,  screen_height/height,  0.0,       10/255,  10/255 , 10/255,
+        -screen_width/width,  screen_height/height,  0.0,       10/255,  10/255 , 10/255
+    ], dtype=np.float32)
+
+    indexData = np.array(
+        [
+            0,1,2,
+            2,3,0
+        ], dtype=np.uint32)
+    
+    return vertexData , indexData
+
 if __name__ == "__main__":
 
     # Initialize glfw
@@ -82,9 +110,15 @@ if __name__ == "__main__":
     glUseProgram(pipeline.shaderProgram)
 
     # Setting up the clear screen color
-    glClearColor(0.15, 0.15, 0.15, 1.0)
+    glClearColor(0.0, 0.0, 0.0, 1.0)
 
     # Creating shapes on GPU memory
+    #SCREEN
+    screen = createScreen(screen_width, screen_height)
+    gpuScreen = es.GPUShape().initBuffers()
+    pipeline.setupVAO(gpuScreen)
+    gpuScreen.fillBuffers(screen[0], screen[1], GL_STATIC_DRAW)
+    # LOGO
     logo = createLogo(0 , 0, _r, _g, _b)
     gpuThing = es.GPUShape().initBuffers()
     pipeline.setupVAO(gpuThing)
@@ -93,12 +127,38 @@ if __name__ == "__main__":
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
     t0 = glfw.get_time()
+    x0 = 0
+    y0 = 0
+    Scale = 1.0
+    rot = 0.0
 
     while not glfw.window_should_close(window):
         # counting time
         t1 = glfw.get_time()
         dt = t1 - t0
         t0 = t1
+        
+        # counting position
+        x1 = x0 + dx
+        y1 = y0 + dy
+        x0, y0 = x1, y1
+
+        # collisions
+        if x1 >= (width-screen_width) or x1 <= -(width-screen_width):
+            dx *= -1
+            if Scale == 1.0:
+                Scale = S
+            else:
+                Scale = 1.0
+            rot = (rot + np.pi)%(2*np.pi)
+        if y1 >= (height-screen_height) or y1 <= -(height-screen_height):
+            dy *= -1
+            if Scale == 1.0:
+                Scale = S
+            else:
+                Scale = 1.0
+            rot = (rot + np.pi)%(2*np.pi)
+
 
         # Using GLFW to check for input events
         glfw.poll_events()
@@ -112,14 +172,24 @@ if __name__ == "__main__":
         # Clearing the screen in both, color and depth
         glClear(GL_COLOR_BUFFER_BIT)
 
-        # Transformations
+        # SCREEN RENDERING
+        # Transformations for Screen
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.matmul(
             [tr.translate(0, 0, 0),
             tr.rotationZ(0.0),
             tr.scale(1.0, 1.0, 1.0)]
         ))
+        # Drawing the screen
+        pipeline.drawCall(gpuScreen)
 
-        # Drawing the Shapes
+        # LOGO RENDERING
+        # Transformations for logo
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.matmul(
+            [tr.translate(x1/width, y1/height, 0),
+            tr.rotationZ(rot),
+            tr.scale(100/width*Scale, 100/height*Scale, 1.0)]
+        ))
+        # Drawing the logo
         pipeline.drawCall(gpuThing)
 
         # Once the render is done, buffers are swapped, showing only the complete scene.
