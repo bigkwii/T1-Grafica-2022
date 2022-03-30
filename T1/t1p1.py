@@ -24,6 +24,7 @@ alpha = ord(iniciales[0])*ord(iniciales[1])
 dx = 10 * np.cos(alpha)
 dy = 10 * np.sin(alpha)
 S = 20_265_040/20_000_000
+logo_size = 20
 
 # This controller will allow to toggle wireframe by hitting spacebar
 class Controller:
@@ -48,16 +49,18 @@ def on_key(window, key, scancode, action, mods):
     else:
         print('Unknown key')
 
-def createLogo(x=0.0,y=0.0,r=1.0,g=1.0,b=1.0):
+def createLogo(l=20, x=0.0,y=0.0,r=1.0,g=1.0,b=1.0):
     '''
     Here's the logo
+    Keep in mind the entire thing will be scaled down to fit the aspect ratio,
+    so if these x,y,z values seem too large, that's why. 
     '''
     vertexData = np.array([
         # POS                   RGB
         #x     y     z          r   g   b
-         0.5,  0.5,  0.0,       r,  g , b,
-        -0.5, -0.5,  0.0,       r,  g , b,
-         0.5, -0.5,  0.0,       r,  g , b
+         l,  l,  0.0,       r,  g , b,
+        -l, -l,  0.0,       r,  g , b,
+         l, -l,  0.0,       r,  g , b
 
     ], dtype=np.float32)
 
@@ -119,7 +122,7 @@ if __name__ == "__main__":
     pipeline.setupVAO(gpuScreen)
     gpuScreen.fillBuffers(screen[0], screen[1], GL_STATIC_DRAW)
     # LOGO
-    logo = createLogo(0 , 0, _r, _g, _b)
+    logo = createLogo(logo_size, 0 , 0, _r, _g, _b)
     gpuThing = es.GPUShape().initBuffers()
     pipeline.setupVAO(gpuThing)
     gpuThing.fillBuffers(logo[0], logo[1], GL_STATIC_DRAW)
@@ -144,14 +147,14 @@ if __name__ == "__main__":
         x0, y0 = x1, y1
 
         # collisions
-        if x1 >= (width-screen_width) or x1 <= -(width-screen_width):
+        if x1 >= (screen_width) or x1 <= -(screen_width):
             dx *= -1
             if Scale == 1.0:
                 Scale = S
             else:
                 Scale = 1.0
             rot = (rot + np.pi)%(2*np.pi)
-        if y1 >= (height-screen_height) or y1 <= -(height-screen_height):
+        if y1 >= (screen_height) or y1 <= -(screen_height):
             dy *= -1
             if Scale == 1.0:
                 Scale = S
@@ -187,7 +190,7 @@ if __name__ == "__main__":
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.matmul(
             [tr.translate(x1/width, y1/height, 0),
             tr.rotationZ(rot),
-            tr.scale(100/width*Scale, 100/height*Scale, 1.0)]
+            tr.scale(Scale/width, Scale/height, 1.0)]
         ))
         # Drawing the logo
         pipeline.drawCall(gpuThing)
