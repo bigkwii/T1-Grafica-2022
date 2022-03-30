@@ -6,116 +6,60 @@ import glfw
 from OpenGL.GL import *
 import OpenGL.GL.shaders
 import numpy as np
+import tr
+import es
 
-SIZE_IN_BYTES = 4
+width = 800
+height = 600
+ar = width/height # aspect ratio
 tuNombre = "Álvaro"
 l = len(tuNombre)
-r = ord(tuNombre[0%l])*ord(tuNombre[1%l])%255
-g = ord(tuNombre[2%l])*ord(tuNombre[3%l])%255
-b = ord(tuNombre[4%l])*ord(tuNombre[5%l])%255
+_r = ord(tuNombre[0%l])*ord(tuNombre[1%l])%255
+_g = ord(tuNombre[2%l])*ord(tuNombre[3%l])%255
+_b = ord(tuNombre[4%l])*ord(tuNombre[5%l])%255
 
-def createShaderProgram():
+# This controller will allow to toggle wireframe by hitting spacebar
+class Controller:
+    fillPolygon = True
+
+# we will use the global controller as communication with the callback function
+controller = Controller()
+
+def on_key(window, key, scancode, action, mods):
+
+    if action != glfw.PRESS:
+        return
     
-    # Defining shaders for our pipeline
-    vertex_shader = """
-    #version 330
-    in vec3 position;
-    in vec3 color;
+    global controller
 
-    out vec3 fragColor;
+    if key == glfw.KEY_SPACE:
+        controller.fillPolygon = not controller.fillPolygon
 
-    void main()
-    {
-        fragColor = color;
-        gl_Position = vec4(position, 1.0f);
-    }
-    """
+    elif key == glfw.KEY_ESCAPE:
+        glfw.set_window_should_close(window, True)
 
-    fragment_shader = """
-    #version 330
+    else:
+        print('Unknown key')
 
-    in vec3 fragColor;
-    out vec4 outColor;
-
-    void main()
-    {
-        outColor = vec4(fragColor, 1.0f);
-    }
-    """
-
-    # Binding artificial vertex array object for validation
-    VAO = glGenVertexArrays(1)
-    glBindVertexArray(VAO)
-
-    # Assembling the shader program (pipeline) with both shaders
-    shaderProgram = OpenGL.GL.shaders.compileProgram(
-        OpenGL.GL.shaders.compileShader(vertex_shader, GL_VERTEX_SHADER),
-        OpenGL.GL.shaders.compileShader(fragment_shader, GL_FRAGMENT_SHADER))
-
-    return shaderProgram
-
-def createQuad(shaderProgram):
-
-    # Defining locations and colors for each vertex of the shape
-    #####################################
-    
-
+def createLogo(x=0.0,y=0.0,r=1.0,g=1.0,b=1.0):
+    '''
+    Here's the logo
+    '''
     vertexData = np.array([
-    #   positions        colors
-        -0.5, -0.5, 0.0,  r/255, g/255, b/255,
-         0.5, -0.5, 0.0,  r/255, g/255, b/255,
-         0.5,  0.5, 0.0,  r/255, g/255, b/255,
-        -0.5,  0.5, 0.0,  r/255, g/255, b/255
-    # It is important to use 32 bits data
-        ], dtype = np.float32)
+        # POS                   RGB
+        #x     y     z          r   g   b
+         0.5,  0.5,  0.0,       r,  g , b,
+        -0.5, -0.5,  0.0,       r,  g , b,
+         0.5, -0.5,  0.0,       r,  g , b
 
-    # Defining connections among vertices
-    # We have a triangle every 3 indices specified
-    indices = np.array(
-        [0, 1, 2,
-         2, 3, 0], dtype= np.uint32)
+    ], dtype=np.float32)
 
-    size = len(indices)
-
-    # VAO, VBO and EBO and  for the shape
-    #####################################
-    vao = glGenVertexArrays(1)
-    vbo = glGenBuffers(1)
-    ebo = glGenBuffers(1)
-
-    # Binding VBO and EBO to the VAO
-    glBindVertexArray(vao)
-    glBindBuffer(GL_ARRAY_BUFFER, vbo)
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
-    glBindVertexArray(0)
-
-    # Setting up stride in the Vertex Attribute Object (VAO)
-    #####################################
-    glBindVertexArray(vao)
-
-    # Setting up the location of the attributes position and color from the VBO
-    # A vertex attribute has 3 integers for the position (each is 4 bytes),
-    # and 3 numbers to represent the color (each is 4 bytes),
-    # Henceforth, we have 3*4 + 3*4 = 24 bytes
-    position = glGetAttribLocation(shaderProgram, "position")
-    glVertexAttribPointer(position, 3, GL_FLOAT, GL_FALSE, 6 * SIZE_IN_BYTES, ctypes.c_void_p(0))
-    glEnableVertexAttribArray(position)
+    indexData = np.array(
+        [
+            0,1,2
+        ], dtype=np.uint32)
     
-    color = glGetAttribLocation(shaderProgram, "color")
-    glVertexAttribPointer(color, 3, GL_FLOAT, GL_FALSE, 6 * SIZE_IN_BYTES, ctypes.c_void_p(3 * SIZE_IN_BYTES))
-    glEnableVertexAttribArray(color)
-
-    # unbinding current vao
-    glBindVertexArray(0)
-
-    # Sending vertices and indices to GPU memory
-    #####################################
-    glBindBuffer(GL_ARRAY_BUFFER, vbo)
-    glBufferData(GL_ARRAY_BUFFER, len(vertexData) * SIZE_IN_BYTES, vertexData, GL_STATIC_DRAW)
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, len(indices) * SIZE_IN_BYTES, indices, GL_STATIC_DRAW)
-
-    return vao, vbo, ebo, size
+    return vertexData , indexData
 
 if __name__ == "__main__":
 
@@ -124,9 +68,6 @@ if __name__ == "__main__":
     if not glfw.init():
         glfw.set_window_should_close(window, True)
 
-    width = 800
-    height = 600
-
     window = glfw.create_window(width, height, "Tarea 1 p1 uwu", None, None)
 
     if not window:
@@ -134,36 +75,57 @@ if __name__ == "__main__":
         glfw.set_window_should_close(window, True)
 
     glfw.make_context_current(window)
+    glfw.set_key_callback(window, on_key)
  
     # Creating our shader program and telling OpenGL to use it
-    shaderProgram = createShaderProgram()
-    glUseProgram(shaderProgram)
+    pipeline = es.SimpleTransformShaderProgram()
+    glUseProgram(pipeline.shaderProgram)
 
-    # Creating shapes on GPU memory
-    vao, vbo, ebo, size = createQuad(shaderProgram)
-    
     # Setting up the clear screen color
     glClearColor(0.15, 0.15, 0.15, 1.0)
 
+    # Creating shapes on GPU memory
+    logo = createLogo(0 , 0, _r, _g, _b)
+    gpuThing = es.GPUShape().initBuffers()
+    pipeline.setupVAO(gpuThing)
+    gpuThing.fillBuffers(logo[0], logo[1], GL_STATIC_DRAW)
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+
+    t0 = glfw.get_time()
+
     while not glfw.window_should_close(window):
+        # counting time
+        t1 = glfw.get_time()
+        dt = t1 - t0
+        t0 = t1
+
         # Using GLFW to check for input events
         glfw.poll_events()
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+        # Filling or not the shapes depending on the controller state
+        if (controller.fillPolygon):
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+        else:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
 
         # Clearing the screen in both, color and depth
         glClear(GL_COLOR_BUFFER_BIT)
 
-        # Drawing the Quad as specified in the VAO with the active shader program
-        glBindVertexArray(vao)
-        glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT, None)
+        # Transformations
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.matmul(
+            [tr.translate(0, 0, 0),
+            tr.rotationZ(0.0),
+            tr.scale(1.0, 1.0, 1.0)]
+        ))
+
+        # Drawing the Shapes
+        pipeline.drawCall(gpuThing)
 
         # Once the render is done, buffers are swapped, showing only the complete scene.
         glfw.swap_buffers(window)
 
     # freeing GPU memory
-    glDeleteBuffers(1, [ebo])
-    glDeleteBuffers(1, [vbo])
-    glDeleteVertexArrays(1, [vao])
+    gpuThing.clear()
 
     glfw.terminate()
