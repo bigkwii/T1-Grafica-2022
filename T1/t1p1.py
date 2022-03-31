@@ -331,7 +331,7 @@ def createLogo(l, x=0.0,y=0.0,r=1.0,g=1.0,b=1.0):
     
     return vertexData , indexData
 
-def createScreen(w, h):
+def createScreen():
     '''
     Screen that sits behind the logo
     '''
@@ -377,7 +377,7 @@ if __name__ == "__main__":
 
     # Creating shapes on GPU memory
     #SCREEN
-    screen = createScreen(screen_width, screen_height)
+    screen = createScreen()
     gpuScreen = es.GPUShape().initBuffers()
     pipeline.setupVAO(gpuScreen)
     gpuScreen.fillBuffers(screen[0], screen[1], GL_STATIC_DRAW)
