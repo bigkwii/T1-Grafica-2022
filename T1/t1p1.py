@@ -18,22 +18,31 @@ else:
     iniciales = sys.argv[2]
     rut = int(sys.argv[3])
 
+# IMPORTANT
+# change this int for scale of the box and logo
+# you may want it to be bigger or smaller depending on your monitor
+SCREEN_SIZE = 4
 
 width = 800
 height = 600
 ar = width/height # aspect ratio
-screen_width = 160*4
-screen_height = 120*4
+screen_width = 160*SCREEN_SIZE
+screen_height = 120*SCREEN_SIZE
 
 l = len(tuNombre)
 _r = (ord(tuNombre[0%l])*ord(tuNombre[1%l]))%255
 _g = (ord(tuNombre[2%l])*ord(tuNombre[3%l]))%255
 _b = (ord(tuNombre[4%l])*ord(tuNombre[5%l]))%255
 alpha = ord(iniciales[0])*ord(iniciales[1])
-dx = 10 * np.cos(alpha)
-dy = 10 * np.sin(alpha)
+# IMPORTANT
+# In order for the speed to stay consistent at different screen sizes,
+# dx and dy must be multiplied by SCREEN_SIZE.
+# This speed ended up beign to fast for my taste.
+# Feel free to un-comment the *SCREEN_SIZE in the following 2 lines
+dx = 10 * np.cos(alpha)#*SCREEN_SIZE
+dy = 10 * np.sin(alpha)#*SCREEN_SIZE
 S = rut/20_000_000 # This is barely noticeable
-logo_size = 100
+logo_size = 25*SCREEN_SIZE
 
 # This controller will allow to toggle wireframe by hitting spacebar
 class Controller:
