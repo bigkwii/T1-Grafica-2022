@@ -7,5 +7,5 @@ Con ESPACIO se puede cambiar a modo "wireframe"
 
 Ojo que tr.py y es.py son necesarios.
 
-El logo erecreado es el logo de SEELE de Neon Genesis Evangelion, más info en el código fuente.
+El logo recreado es el logo de SEELE de Neon Genesis Evangelion, más info en el código fuente.
 
