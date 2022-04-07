@@ -1,6 +1,12 @@
+"""
+Transformation matrices.
+"""
 import numpy as np
 
 def translate(tx, ty, tz):
+    """
+    Returns an ortogonal translation matrix.
+    """
     return np.array([
         [1,0,0,tx],
         [0,1,0,ty],
@@ -9,6 +15,9 @@ def translate(tx, ty, tz):
 
 
 def scale(sx, sy, sz):
+    """
+    Returns an ortogonal scale matrix.
+    """
     return np.array([
         [sx,0,0,0],
         [0,sy,0,0],
@@ -17,6 +26,9 @@ def scale(sx, sy, sz):
 
 
 def rotationX(theta):
+    """
+    Returns an ortogonal rotation matrix (around the X axis).
+    """
     sin_theta = np.sin(theta)
     cos_theta = np.cos(theta)
 
@@ -28,6 +40,9 @@ def rotationX(theta):
 
 
 def rotationY(theta):
+    """
+    Returns an ortogonal rotation matrix (around the Y axis).
+    """
     sin_theta = np.sin(theta)
     cos_theta = np.cos(theta)
 
@@ -39,6 +54,9 @@ def rotationY(theta):
 
 
 def rotationZ(theta):
+    """
+    Returns an ortogonal rotation matrix (around the Z axis).
+    """
     sin_theta = np.sin(theta)
     cos_theta = np.cos(theta)
 
@@ -50,6 +68,9 @@ def rotationZ(theta):
 
 
 def matmul(mats):
+    """
+    Returns the product of an array of matrices.
+    """
     out = mats[0]
     for i in range(1, len(mats)):
         out = np.matmul(out, mats[i])

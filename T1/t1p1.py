@@ -41,7 +41,7 @@ alpha = ord(iniciales[0])*ord(iniciales[1])
 # Feel free to un-comment the *SCREEN_SIZE in the following 2 lines
 dx = 350 * np.cos(alpha)#*SCREEN_SIZE
 dy = 350 * np.sin(alpha)#*SCREEN_SIZE
-S = (rut/20_000_000)**(3*6) # on april 7th 2022, a true bruh momemt happened.
+S = (rut/20_000_000)**(3) # on april 7th 2022, a true bruh momemt happened.
                             # let me explain: the scale factor needed to be cubed
                             # in order for the change to be noticeable.
                             # HOWEVER, in my case this didn't change much.
@@ -49,6 +49,8 @@ S = (rut/20_000_000)**(3*6) # on april 7th 2022, a true bruh momemt happened.
                             # My scale factor is too close to 1.0
                             # So I just slapped a *6 multiplier in there.
                             # Feel free to remove it.
+                            # (2022-4-7 | 19:32) Ok, I removed the multiplier.
+                            # Enjoy your barely changing logo.
 logo_size = 25*SCREEN_SIZE
 
 # This controller will allow to toggle wireframe by hitting spacebar

@@ -1,10 +1,21 @@
+"""
+Easy Shaders.
+Some classes for easier handling of shaders and shapes.
+"""
 from OpenGL.GL import *
 import OpenGL.GL.shaders
 import numpy as np
 
+# 1 byte = 8 bits
+# we'll use 32 bits, so 4 bytes
 SIZE_IN_BYTES = 4
 
 class GPUShape:
+    '''
+    Class representing a shape on the CPU.
+    Contains it's buffers with vertices and indices.
+    Plus some other stuff that will be unused for this assignment.
+    '''
     def __init__(self):
         """VAO, VBO, EBO and texture handlers to GPU memory"""
         
@@ -34,6 +45,9 @@ class GPUShape:
             "  tex=" + str(self.texture)
 
     def fillBuffers(self, vertices, indices, usage):
+        '''
+        Fills the buffers with teh vertex and index data.
+        '''
 
         vertexData = np.array(vertices, dtype=np.float32)
         indices = np.array(indices, dtype=np.uint32)
@@ -62,6 +76,9 @@ class GPUShape:
             glDeleteVertexArrays(1, [self.vao])
 
 class SimpleTransformShaderProgram:
+    """
+    Our shader program.
+    """
 
     def __init__(self):
 
@@ -104,6 +121,9 @@ class SimpleTransformShaderProgram:
             OpenGL.GL.shaders.compileShader(fragment_shader, OpenGL.GL.GL_FRAGMENT_SHADER))
 
     def setupVAO(self, gpuShape):
+        """
+        Sets up the VAO on a given GPUShape, according to this shader program.
+        """
         glBindVertexArray(gpuShape.vao)
 
         glBindBuffer(GL_ARRAY_BUFFER, gpuShape.vbo)
@@ -123,6 +143,9 @@ class SimpleTransformShaderProgram:
 
 
     def drawCall(self, gpuShape, mode=GL_TRIANGLES):
+        """
+        Draws the given gpuShape. By default, it interprets the vertices as triangles.
+        """
         # assert isinstance(gpuShape, GPUShape)
 
         # Binding the VAO and executing the draw call
