@@ -37,11 +37,18 @@ alpha = ord(iniciales[0])*ord(iniciales[1])
 # IMPORTANT
 # In order for the speed to stay consistent at different screen sizes,
 # dx and dy must be multiplied by SCREEN_SIZE.
-# This speed ended up beign to fast for my taste.
+# This speed ended up being too fast for my taste.
 # Feel free to un-comment the *SCREEN_SIZE in the following 2 lines
-dx = 10 * np.cos(alpha)#*SCREEN_SIZE
-dy = 10 * np.sin(alpha)#*SCREEN_SIZE
-S = rut/20_000_000 # This is barely noticeable
+dx = 350 * np.cos(alpha)#*SCREEN_SIZE
+dy = 350 * np.sin(alpha)#*SCREEN_SIZE
+S = (rut/20_000_000)**(3*6) # on april 7th 2022, a true bruh momemt happened.
+                            # let me explain: the scale factor needed to be cubed
+                            # in order for the change to be noticeable.
+                            # HOWEVER, in my case this didn't change much.
+                            # Things really only got noticeable at around **15
+                            # My scale factor is too close to 1.0
+                            # So I just slapped a *6 multiplier in there.
+                            # Feel free to remove it.
 logo_size = 25*SCREEN_SIZE
 
 # This controller will allow to toggle wireframe by hitting spacebar
@@ -112,7 +119,8 @@ def createLogo(l, x=0.0,y=0.0,r=1.0,g=1.0,b=1.0):
           I HMMMP::/:/"Y/"
            \|'""  '':|
     '''
-    t = 1.5 # t for thickness
+    l = l - l/8 # small adjustment, one of the eyes ended up hanging outside the square
+    t = 3.0 # t for thickness
     sqrt3 = np.sqrt(3)
     a = t/sqrt3 # some small distance i needed. it took some high school level geometry to get
     c = t/np.sin(np.pi/6) # another one of such distances
@@ -411,19 +419,19 @@ if __name__ == "__main__":
         t0 = t1
         
         # counting position
-        x1 = x0 + dx
-        y1 = y0 + dy
+        x1 = x0 + dx*dt
+        y1 = y0 + dy*dt
         x0, y0 = x1, y1
 
         # collisions
-        if x1 >= (screen_width - logo_size) or x1 <= -(screen_width - logo_size):
+        if x1 >= (screen_width - logo_size*S) or x1 <= -(screen_width - logo_size*S):
             dx *= -1
             if Scale == 1.0:
                 Scale = S
             else:
                 Scale = 1.0
             rot = (rot + np.pi/2)%(2*np.pi)
-        if y1 >= (screen_height - logo_size) or y1 <= -(screen_height - logo_size):
+        if y1 >= (screen_height - logo_size*S) or y1 <= -(screen_height - logo_size*S):
             dy *= -1
             if Scale == 1.0:
                 Scale = S
