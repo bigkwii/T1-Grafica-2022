@@ -38,7 +38,7 @@ def getAssetPath(filename):
 def asCartesian(rthetaphi):
     '''
     Takes an array of a radius, theta, phi and returns a cartesian coordinate
-    Swapping y and z since I want +y to be UP.
+    Shuffling x, y and z since I want +y to be UP.
     '''
     r       = rthetaphi[0]
     theta   = rthetaphi[1]
@@ -46,7 +46,7 @@ def asCartesian(rthetaphi):
     x = r * np.sin( theta ) * np.cos( phi )
     y = r * np.sin( theta ) * np.sin( phi )
     z = r * np.cos( theta )
-    return np.array([x,z,y])
+    return np.array([z,x,y])
 
 # Controller class
 class Controller:
@@ -56,6 +56,8 @@ class Controller:
         self.theta = np.pi/2
         self.phi = 0
         self.eye = asCartesian([self.radius, self.theta, self.phi])
+        self.up_phi = np.pi/2
+        self.up = np.array([np.sin(self.up_phi),np.cos(self.up_phi),0])
 
 # our controller
 controller = Controller()
@@ -80,7 +82,12 @@ def on_key(window, key, scancode, action, mods):
     elif key == glfw.KEY_D:
         controller.phi = (controller.phi-np.pi/90)%(2*np.pi)
         controller.eye = asCartesian([controller.radius, controller.theta, controller.phi])
-        
+    elif key == glfw.KEY_Q:
+        controller.up_phi = (controller.up_phi+np.pi/90)%(2*np.pi)
+        controller.up = np.array([np.sin(controller.up_phi),np.cos(controller.up_phi),0])
+    elif key == glfw.KEY_E:
+        controller.up_phi = (controller.up_phi-np.pi/90)%(2*np.pi)
+        controller.up = np.array([np.sin(controller.up_phi),np.cos(controller.up_phi),0])
     else:
         print('Unknown key')
 
@@ -109,14 +116,14 @@ def main():
     pipeline = es.SimpleTextureModelViewProjectionShaderProgram()
 
     # Telling OpenGL to use our shader program
-    glUseProgram(pipeline.shaderProgram)
+    # glUseProgram(pipeline.shaderProgram)
 
     # Setting up the clear screen color
     glClearColor(0.25, 0.25, 0.25, 1.0)
 
     # Creating shapes on GPU memory
     # Texture Sphere!
-    shape = bs.createTextureSphere(4, 2)
+    shape = bs.createTextureSphere(4, 3)
     gpuShape = es.GPUShape().initBuffers()
     pipeline.setupVAO(gpuShape)
     gpuShape.fillBuffers(shape.vertices, shape.indices, GL_STATIC_DRAW)
@@ -124,19 +131,12 @@ def main():
         getAssetPath("earth.png"), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR
     )
 
-    # Color Sphere!
-    # shape = bs.createSphere(1,0,0,100, 100)
-    # gpuShape = es.GPUShape().initBuffers()
-    # pipeline.setupVAO(gpuShape)
-    # gpuShape.fillBuffers(shape.vertices, shape.indices, GL_STATIC_DRAW)
-
-
     # Projection and view
-    projection = tr.perspective(45, float(width)/float(height), 0.1, 100)
+    projection = tr.perspective(60, float(width)/float(height), 0.1, 100)
     view = tr.lookAt(
             controller.eye,
             np.array([0,0,0]),
-            np.array([0,1,0])
+            controller.up
         )
 
     # MAIN LOOP
@@ -153,13 +153,15 @@ def main():
         view = tr.lookAt(
             controller.eye,
             np.array([0,0,0]),
-            np.array([0,1,0])
+            controller.up
         )
 
         # Clearing the screen in both, color and depth
         glClear(GL_COLOR_BUFFER_BIT)
 
-        # Drawing the shapes        
+        # Drawing the shapes    
+        # SPHERE
+        glUseProgram(pipeline.shaderProgram)    
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "transform"), 1, GL_TRUE, tr.uniformScale(1.5))
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)

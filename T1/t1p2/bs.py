@@ -115,14 +115,17 @@ def createTextureSphere(slices,stacks):
             y = xy*np.sin(sliceAngle)
             nx = j/slices
             ny = i/stacks
-            vertices += [x, y, z, nx, ny]
+            vertices += [z, x, y, nx, ny]
+            print(z,x,y)
     # indices
     for i in range(stacks):
         k1 = i*(slices+1)
         k2 = k1 + slices+1
         for j in range(slices):
-            indices += [k1, k2, k1+1]
-            indices += [k1+1, k2, k2+1]
+            if i != 0:
+                indices += [k1, k2, k1+1]
+            if i != stacks-1:
+                indices += [k1+1, k2, k2+1]
             k1 += 1
             k2 += 1
     print(len(vertices)/5, len(indices)/3)
