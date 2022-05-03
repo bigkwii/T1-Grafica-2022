@@ -123,7 +123,7 @@ def main():
 
     # Creating shapes on GPU memory
     # Texture Sphere!
-    shape = bs.createTextureSphere(4, 3)
+    shape = bs.createTextureSphere(40, 30)
     gpuShape = es.GPUShape().initBuffers()
     pipeline.setupVAO(gpuShape)
     gpuShape.fillBuffers(shape.vertices, shape.indices, GL_STATIC_DRAW)
