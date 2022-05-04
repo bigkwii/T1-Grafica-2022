@@ -43,10 +43,10 @@ def asCartesian(rthetaphi):
     r       = rthetaphi[0]
     theta   = rthetaphi[1]
     phi     = rthetaphi[2]
-    x = r * np.sin( theta ) * np.cos( phi )
-    y = r * np.sin( theta ) * np.sin( phi )
-    z = r * np.cos( theta )
-    return np.array([z,x,y])
+    z = r * np.sin( theta ) * np.cos( phi )
+    x = r * np.sin( theta ) * np.sin( phi )
+    y = r * np.cos( theta )
+    return np.array([x,y,z])
 
 # Controller class
 class Controller:
@@ -57,7 +57,7 @@ class Controller:
         self.phi = 0
         self.eye = asCartesian([self.radius, self.theta, self.phi])
         self.up_phi = np.pi/2
-        self.up = np.array([np.sin(self.up_phi),np.cos(self.up_phi),0])
+        self.up = np.array([np.cos(self.up_phi),np.sin(self.up_phi),0])
 
 # our controller
 controller = Controller()
@@ -84,10 +84,10 @@ def on_key(window, key, scancode, action, mods):
         controller.eye = asCartesian([controller.radius, controller.theta, controller.phi])
     elif key == glfw.KEY_Q:
         controller.up_phi = (controller.up_phi+np.pi/90)%(2*np.pi)
-        controller.up = np.array([np.sin(controller.up_phi),np.cos(controller.up_phi),0])
+        controller.up = np.array([np.cos(controller.up_phi),np.sin(controller.up_phi),0])
     elif key == glfw.KEY_E:
         controller.up_phi = (controller.up_phi-np.pi/90)%(2*np.pi)
-        controller.up = np.array([np.sin(controller.up_phi),np.cos(controller.up_phi),0])
+        controller.up = np.array([np.cos(controller.up_phi),np.sin(controller.up_phi),0])
     else:
         print('Unknown key')
 
@@ -123,13 +123,18 @@ def main():
 
     # Creating shapes on GPU memory
     # Texture Sphere!
-    shape = bs.createTextureSphere(40, 30)
+    shape = bs.createTextureSphere(4, 3)
     gpuShape = es.GPUShape().initBuffers()
     pipeline.setupVAO(gpuShape)
     gpuShape.fillBuffers(shape.vertices, shape.indices, GL_STATIC_DRAW)
     gpuShape.texture = es.textureSimpleSetup(
         getAssetPath("earth.png"), GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR
     )
+
+    # shape = bs.createSphere(1, 0, 0,40,30)
+    # gpuShape = es.GPUShape().initBuffers()
+    # pipeline.setupVAO(gpuShape)
+    # gpuShape.fillBuffers(shape.vertices, shape.indices, GL_STATIC_DRAW)
 
     # Projection and view
     projection = tr.perspective(60, float(width)/float(height), 0.1, 100)

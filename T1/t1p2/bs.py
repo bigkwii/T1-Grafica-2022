@@ -75,21 +75,30 @@ def createSphere(r,g,b,slices,stacks):
     '''
     vertices = []
     indices = []
+    sliceStep = 2*np.pi/slices
+    stackStep = np.pi/stacks
+    # vertices
+    for i in range(stacks+1):
+        stackAngle = i*stackStep
+        xy = np.sin(stackAngle)
+        z = np.cos(stackAngle)
+        for j in range(slices+1):
+            _b += 1/slices
+            sliceAngle = j*sliceStep
+            x = xy*np.cos(sliceAngle)
+            y = xy*np.sin(sliceAngle)
+            vertices += [z, x, y, r,g,b]
+    # indices
     for i in range(stacks):
+        k1 = i*(slices+1)
+        k2 = k1 + slices + 1
         for j in range(slices):
-            # Calculate the vertex locations
-            x = np.sin(np.pi * i / stacks) * np.cos(2 * np.pi * j / slices)
-            y = np.sin(np.pi * i / stacks) * np.sin(2 * np.pi * j / slices)
-            z = np.cos(np.pi * i / stacks)
-            # Add the vertex to the list
-            vertices += [x, y, z, r, g, b]
-    for i in range(stacks-1):
-        for j in range(slices):
-            # Calculate the index
-            index = i * slices + j
-            # Add the indices to the list
-            indices += [index, index + slices, index + slices + 1]
-            indices += [index, index + slices + 1, index + 1]
+            if i != 0:
+                indices += [k1, k2, k1+1]
+            if i != stacks-1:
+                indices += [k2, k2+1, k1+1]
+            k1 += 1
+            k2 += 1
     return Shape(vertices, indices)
 
 def createTextureSphere(slices,stacks):
@@ -105,29 +114,29 @@ def createTextureSphere(slices,stacks):
     sliceStep = 2*np.pi/slices
     stackStep = np.pi/stacks
     # vertices
-    for i in range(stacks+1):
-        stackAngle = i*stackStep
-        xy = np.sin(stackAngle)
-        z = np.cos(stackAngle)
-        for j in range(slices+1):
-            sliceAngle = j*sliceStep
-            x = xy*np.cos(sliceAngle)
-            y = xy*np.sin(sliceAngle)
+    vertices += [0,1,0,0,0]
+    for i in range(slices+1):
+        sliceAngle = i*sliceStep
+        for j in range(1,stacks):
+            stackAngle = j*stackStep
+            y = np.cos(stackAngle)
+            z = np.sin(stackAngle)*np.cos(sliceAngle)
+            x = np.sin(stackAngle)*np.sin(sliceAngle)
             nx = j/slices
             ny = i/stacks
-            vertices += [z, x, y, nx, ny]
-    # indices
-    for i in range(stacks):
-        k1 = i*(slices+1)
-        k2 = k1 + slices+1
-        for j in range(slices):
-            if i != 0:
-                indices += [k1, k2+1, k1+1]
-            if i != stacks-1:
-                indices += [k1, k2, k2+1]
+            vertices += [x, y, z, nx, ny]
+    vertices += [0,-1,0,0,1]
+    for i in range(len(vertices)//5):
+        print(vertices[5*i], vertices[5*i+1], vertices[5*i+2])
+    # indices TODO: fix this
+    for i in range(slices):
+        k1 = i*(stacks+1)
+        k2 = k1 + stacks + 1
+        for j in range(1, stacks-1):
+            indices += [k1, k1+1, k2+1]
+            indices += [k1, k2, k2+1]
             k1 += 1
             k2 += 1
-    print(len(vertices)/5, len(indices)/3)
     return Shape(vertices, indices)
 
 
