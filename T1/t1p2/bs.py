@@ -126,8 +126,6 @@ def createTextureSphere(slices,stacks):
             ny = i/stacks
             vertices += [x, y, z, nx, ny]
     vertices += [0,-1,0,0,1]
-    for i in range(len(vertices)//5):
-        print(vertices[5*i], vertices[5*i+1], vertices[5*i+2])
     # indices TODO: fix this
     for i in range(slices):
         k1 = i*(stacks+1)
