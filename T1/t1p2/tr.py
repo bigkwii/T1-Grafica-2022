@@ -26,6 +26,13 @@ def scale(sx, sy, sz):
         [0,0,sz,0],
         [0,0,0,1]], dtype = np.float32)
 
+def colorScale(sr, sg, sb, sa):
+    return np.array([
+        [sr,0,0,0],
+        [0,sg,0,0],
+        [0,0,sb,0],
+        [0,0,0,sa]], dtype = np.float32)
+
 
 def rotationX(theta):
     sin_theta = np.sin(theta)

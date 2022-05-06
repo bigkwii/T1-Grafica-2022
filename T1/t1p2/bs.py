@@ -41,28 +41,26 @@ def createColorQuad(r, g, b):
 def createCube(r,g,b):
     # Defining locations and colors for each vertex of the shape
     vertices = [
-    #   positions        colors
-        -0.5, -0.5, -0.5,  r, g, b,
-         0.5, -0.5, -0.5,  r, g, b,
-         0.5,  0.5, -0.5,  r, g, b,
-         0.5,  0.5, -0.5,  r, g, b,
-        -0.5,  0.5, -0.5,  r, g, b,
-        -0.5, -0.5, -0.5,  r, g, b]
+    #    positions         colors
+        -0.5, -0.5,  0.5,  r,g,b,
+         0.5, -0.5,  0.5,  r,g,b,
+         0.5,  0.5,  0.5,  r,g,b,
+        -0.5,  0.5,  0.5,  r,g,b,
+        -0.5, -0.5, -0.5,  r,g,b,
+         0.5, -0.5, -0.5,  r,g,b,
+         0.5,  0.5, -0.5,  r,g,b,
+        -0.5,  0.5, -0.5,  r,g,b]
+
     # Defining connections among vertices
     # We have a triangle every 3 indices specified
     indices = [
-        0, 1, 2,
-        2, 3, 0,
-        4, 5, 6,
-        6, 7, 4,
-        0, 4, 7,
-        7, 1, 0,
-        3, 2, 6,
-        6, 5, 3,
-        1, 7, 5,
-        5, 2, 1,
-        0, 3, 5,
-        5, 4, 0]
+         0, 1, 2, 2, 3, 0,
+         4, 5, 6, 6, 7, 4,
+         4, 5, 1, 1, 0, 4,
+         6, 7, 3, 3, 2, 6,
+         5, 6, 2, 2, 1, 5,
+         7, 4, 0, 0, 3, 7]
+
     return Shape(vertices, indices)
 
 def createSphere(r,g,b,slices,stacks):
@@ -79,24 +77,22 @@ def createSphere(r,g,b,slices,stacks):
     stackStep = np.pi/stacks
     # vertices
     for i in range(stacks+1):
-        stackAngle = i*stackStep
-        xy = np.sin(stackAngle)
-        z = np.cos(stackAngle)
+        lon = i*stackStep
         for j in range(slices+1):
-            _b += 1/slices
-            sliceAngle = j*sliceStep
-            x = xy*np.cos(sliceAngle)
-            y = xy*np.sin(sliceAngle)
-            vertices += [z, x, y, r,g,b]
-    # indices
+            lat = j*sliceStep
+            x = np.sin(lon)*np.sin(lat)
+            y = np.cos(lon)
+            z = np.sin(lon)*np.cos(lat)
+            nx = j/slices
+            ny = i/stacks
+            vertices += [x,y,z,r,g,b]
+    # indices TODO: fix this
     for i in range(stacks):
         k1 = i*(slices+1)
         k2 = k1 + slices + 1
         for j in range(slices):
-            if i != 0:
-                indices += [k1, k2, k1+1]
-            if i != stacks-1:
-                indices += [k2, k2+1, k1+1]
+            indices += [k1, k2, k1+1]
+            indices += [k1+1, k2, k2+1]
             k1 += 1
             k2 += 1
     return Shape(vertices, indices)
@@ -114,30 +110,54 @@ def createTextureSphere(slices,stacks):
     sliceStep = 2*np.pi/slices
     stackStep = np.pi/stacks
     # vertices
-    vertices += [0,1,0,0,0]
-    for i in range(slices+1):
-        sliceAngle = i*sliceStep
-        for j in range(1,stacks):
-            stackAngle = j*stackStep
-            y = np.cos(stackAngle)
-            z = np.sin(stackAngle)*np.cos(sliceAngle)
-            x = np.sin(stackAngle)*np.sin(sliceAngle)
+    for i in range(stacks+1):
+        lon = i*stackStep
+        for j in range(slices+1):
+            lat = j*sliceStep
+            x = np.sin(lon)*np.sin(lat)
+            y = np.cos(lon)
+            z = np.sin(lon)*np.cos(lat)
             nx = j/slices
             ny = i/stacks
-            vertices += [x, y, z, nx, ny]
-    vertices += [0,-1,0,0,1]
+            vertices += [x,y,z,nx,ny]
     # indices TODO: fix this
-    for i in range(slices):
-        k1 = i*(stacks+1)
-        k2 = k1 + stacks + 1
-        for j in range(1, stacks-1):
-            indices += [k1, k1+1, k2+1]
-            indices += [k1, k2, k2+1]
+    for i in range(stacks):
+        k1 = i*(slices+1)
+        k2 = k1 + slices + 1
+        for j in range(slices):
+            indices += [k1, k2, k1+1]
+            indices += [k1+1, k2, k2+1]
             k1 += 1
             k2 += 1
     return Shape(vertices, indices)
 
+def createAlfaCube(r,g,b,a):
+    '''
+    Makes a rgba cube.
+    '''
+    # Defining the location and colors of each vertex  of the shape
+    vertices = [
+    #    positions         colors
+        -0.5, -0.5,  0.5,  r,g,b,a,
+         0.5, -0.5,  0.5,  r,g,b,a,
+         0.5,  0.5,  0.5,  r,g,b,a,
+        -0.5,  0.5,  0.5,  r,g,b,a,
+        -0.5, -0.5, -0.5,  r,g,b,a,
+         0.5, -0.5, -0.5,  r,g,b,a,
+         0.5,  0.5, -0.5,  r,g,b,a,
+        -0.5,  0.5, -0.5,  r,g,b,a]
 
+    # Defining connections among vertices
+    # We have a triangle every 3 indices specified
+    indices = [
+         0, 1, 2, 2, 3, 0,
+         4, 5, 6, 6, 7, 4,
+         4, 5, 1, 1, 0, 4,
+         6, 7, 3, 3, 2, 6,
+         5, 6, 2, 2, 1, 5,
+         7, 4, 0, 0, 3, 7]
+
+    return Shape(vertices, indices)
 
 
 
