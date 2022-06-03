@@ -131,7 +131,7 @@ def main():
 
     # SPHERE PIPELINE AND SHAPE
     spherePipeline = es.SimpleTextureModelViewProjectionShaderProgram()
-    sphere = bs.createTextureSphere(40, 30)
+    sphere = bs.createTextureSphere(10, 10)
     gpuSphere = es.GPUShape().initBuffers()
     spherePipeline.setupVAO(gpuSphere)
     gpuSphere.fillBuffers(sphere.vertices, sphere.indices, GL_STATIC_DRAW)
