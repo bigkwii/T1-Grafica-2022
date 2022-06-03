@@ -131,7 +131,11 @@ def main():
 
     # SPHERE PIPELINE AND SHAPE
     spherePipeline = es.SimpleTextureModelViewProjectionShaderProgram()
+<<<<<<< HEAD
     sphere = bs.createTextureSphere(10, 10)
+=======
+    sphere = bs.createTextureSphere(20, 20)
+>>>>>>> 27bcd66a87985bce93e4aabcbe9afdd3011c6b2c
     gpuSphere = es.GPUShape().initBuffers()
     spherePipeline.setupVAO(gpuSphere)
     gpuSphere.fillBuffers(sphere.vertices, sphere.indices, GL_STATIC_DRAW)
@@ -178,8 +182,6 @@ def main():
         t = glfw.get_time()
         dt = t - t0
         t0 = t
-        vel1 += g/2*dt*dt # gravity
-        vel2 += g/2*dt*dt
         pos1 += dt*vel1
         pos2 += dt*vel2
 
@@ -187,15 +189,21 @@ def main():
         if pos1[1] <= -L/2+r:
             pos1[1] = -L/2+r
             vel1[1] *= -1
+        else:
+            vel1 += g*dt # gravity
         if pos1[1] >= L/2-r:
             pos1[1] = L/2-r
             vel1[1] = 0
+            vel1 += g*dt # gravity
         if pos2[1] <= -L/2+r:
             pos2[1] = -L/2+r
             vel2[1] *= -1
+        else:
+            vel2 += g*dt # gravity
         if pos2[1] >= L/2-r:
             pos2[1] = L/2-r
             vel2[1] = 0
+            vel2 += g*dt # gravity
         # x
         if pos1[0] <= -L/2+r:
             pos1[0] = -L/2+r
